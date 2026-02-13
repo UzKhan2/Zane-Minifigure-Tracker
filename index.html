@@ -3,48 +3,106 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Zane Minifigure Tracker</title>
+    <title>Zane Collection Tracker</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon" />
 
     <style>
+      /* ---------- BASE ---------- */
       body {
         font-family: Arial, sans-serif;
         background: #f5f5f5;
         padding: 20px;
+        transition:
+          background 0.3s,
+          color 0.3s;
       }
-
+      body.dark {
+        background: #1e1e1e;
+        color: #f5f5f5;
+      }
       h1 {
         text-align: center;
       }
 
+      /* ---------- TOGGLE ---------- */
+      .toggle,
+      .controls,
+      .filters,
+      .actions {
+        text-align: center;
+        margin-bottom: 10px;
+      }
+      .toggle button,
+      .actions button,
+      .filters select {
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        margin: 2px;
+      }
+      .active-btn {
+        background: #4caf50;
+        color: white;
+      }
+
+      /* ---------- SEARCH & SORT ---------- */
+      #search {
+        width: 150px;
+        padding: 5px;
+      }
+      #sort {
+        padding: 5px;
+      }
+
+      /* ---------- PROGRESS BAR ---------- */
+      .progress-container {
+        width: 90%;
+        height: 16px;
+        background: #ddd;
+        border-radius: 8px;
+        margin: 10px auto;
+        overflow: hidden;
+      }
+      .progress-bar {
+        height: 100%;
+        background: #4caf50;
+        width: 0%;
+        border-radius: 8px 0 0 8px;
+        transition: width 0.3s;
+      }
+
+      /* ---------- GRID ---------- */
       .grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, 150px);
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
         gap: 12px;
         justify-content: center;
-        margin-top: 20px;
+        margin-top: 10px;
       }
 
       /* ---------- CARD ---------- */
-
       .card {
         height: 200px;
         background: white;
         border-radius: 12px;
-        padding: 12px;
+        padding: 10px;
         text-align: center;
         cursor: pointer;
         box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-        transition: 0.2s;
+        transition:
+          0.2s,
+          border-color 0.3s,
+          opacity 0.3s;
         user-select: none;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-
         position: relative;
         overflow: hidden;
+        border: 3px solid transparent;
       }
-
+      body.dark .card {
+        background: #2c2c2c;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.6);
+      }
       .card:hover {
         transform: scale(1.05);
       }
@@ -54,70 +112,103 @@
         text-decoration: line-through;
       }
 
-      /* ---------- FRONT (image) ---------- */
+      /* ---------- RARITY ---------- */
+      .rarity-common {
+        border-color: #cccccc;
+      }
+      .rarity-uncommon {
+        border-color: #4caf50;
+      }
+      .rarity-rare {
+        border-color: #2196f3;
+      }
+      .rarity-epic {
+        border-color: #70085a;
+      }
+      .rarity-legendary {
+        border-color: #ff9800;
+      }
 
+      .rarity-badge {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        padding: 2px 4px;
+        font-size: 0.65em;
+        font-weight: bold;
+        color: white;
+        border-radius: 6px;
+        pointer-events: none;
+        opacity: 0.85;
+      }
+      .badge-common {
+        background-color: #cccccc;
+      }
+      .badge-uncommon {
+        background-color: #4caf50;
+      }
+      .badge-rare {
+        background-color: #2196f3;
+      }
+      .badge-epic {
+        background-color: #70085a;
+      }
+      .badge-legendary {
+        background-color: #ff9800;
+      }
+
+      /* ---------- CARD FRONT & BACK ---------- */
       .front,
       .back {
         position: absolute;
         inset: 0;
-
         display: flex;
         flex-direction: column;
-        align-items: center;
         justify-content: center;
-
-        padding: 10px;
+        align-items: center;
+        padding: 5px;
         text-align: center;
       }
-
-      .front {
-        gap: 6px;
+      .back {
+        display: none;
+        font-size: 0.85em;
+        gap: 4px;
+      }
+      .card:hover .front {
+        display: none;
+      }
+      .card:hover .back {
+        display: flex;
       }
 
       .minifig-img {
         width: 100px;
         height: auto;
       }
-
       .figure-name {
         font-weight: bold;
         font-size: 0.9em;
-
         overflow: hidden;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
       }
-
-      /* ---------- BACK (info) ---------- */
-
-      .back {
-        display: none;
-        font-size: 0.85em;
-        gap: 4px;
-      }
-
-      .card:hover .front {
-        display: none;
-      }
-
-      .card:hover .back {
-        display: flex;
-      }
-
       .links {
         display: flex;
         flex-direction: column;
         gap: 4px;
         margin-top: 6px;
       }
-
       .links a {
         color: #007bff;
         text-decoration: none;
-        font-size: 1em;
+        font-size: 0.85em;
       }
-
+      .links span.disabled {
+        color: gray;
+        cursor: default;
+        font-size: 0.85em;
+      }
       .links a:hover {
         text-decoration: underline;
       }
@@ -127,80 +218,274 @@
         font-weight: bold;
         margin-top: 10px;
       }
+
+      /* ---------- DARK MODE ---------- */
+      body.dark input,
+      body.dark select {
+        background: #333;
+        color: #f5f5f5;
+        border: 1px solid #555;
+      }
     </style>
   </head>
 
   <body>
-    <h1>Zane Minifigure Tracker</h1>
+    <h1>Zane Collection Tracker</h1>
+
+    <div class="toggle">
+      <button id="btnFigures" onclick="loadData('figures', this)">
+        Minifigs
+      </button>
+      <button id="btnBricks" onclick="loadData('bricks', this)">Bricks</button>
+      <button onclick="toggleDarkMode()">Dark/Light Mode</button>
+    </div>
+
+    <div class="controls">
+      <input
+        type="text"
+        id="search"
+        placeholder="Search..."
+        oninput="filterAndRender()"
+      />
+      <select id="sort" onchange="filterAndRender()">
+        <option value="name-asc">Name ↑</option>
+        <option value="name-desc">Name ↓</option>
+        <option value="year-asc">Year ↑</option>
+        <option value="year-desc">Year ↓</option>
+      </select>
+      <select id="categoryFilter" onchange="filterAndRender()">
+        <option value="">All Categories</option>
+      </select>
+      <select id="sizeSelect" onchange="filterAndRender()">
+        <option value="small">Small</option>
+        <option value="medium" selected>Medium</option>
+        <option value="large">Large</option>
+      </select>
+    </div>
+
+    <div class="actions">
+      <button onclick="markAllOwned()">Mark All Owned</button>
+      <button onclick="resetAll()">Reset All</button>
+      <button onclick="exportCollection()">Export JSON</button>
+      <input type="file" id="importFile" onchange="importCollection(event)" />
+    </div>
+
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
     <div class="count" id="count"></div>
     <div class="grid" id="grid"></div>
 
     <script>
-      let figures = [];
-      let owned = JSON.parse(localStorage.getItem("ownedZanes") || {});
+      let items = [],
+        currentType = "figures";
+      let owned = JSON.parse(localStorage.getItem("ownedItems") || "{}");
+
       const grid = document.getElementById("grid");
+      const countEl = document.getElementById("count");
+      const searchInput = document.getElementById("search");
+      const sortSelect = document.getElementById("sort");
+      const categoryFilter = document.getElementById("categoryFilter");
+      const sizeSelect = document.getElementById("sizeSelect");
+      const progressBar = document.getElementById("progressBar");
 
       function save() {
-        localStorage.setItem("ownedZanes", JSON.stringify(owned));
+        localStorage.setItem("ownedItems", JSON.stringify(owned));
       }
 
-      function updateCount() {
-        const total = figures.length;
-        const have = Object.values(owned).filter(Boolean).length;
-        document.getElementById("count").textContent =
-          `${have} / ${total} collected`;
+      function getRarityClass(rarity) {
+        if (!rarity) return { border: "", badge: "" };
+        const r = rarity.toLowerCase();
+        if (r === "common")
+          return { border: "rarity-common", badge: "badge-common" };
+        if (r === "uncommon")
+          return { border: "rarity-uncommon", badge: "badge-uncommon" };
+        if (r === "rare") return { border: "rarity-rare", badge: "badge-rare" };
+        if (r === "epic") return { border: "rarity-epic", badge: "badge-epic" };
+        if (r.includes("legendary"))
+          return { border: "rarity-legendary", badge: "badge-legendary" };
+        return { border: "", badge: "" };
       }
 
-      fetch("data/figures.json")
-        .then((r) => r.json())
-        .then((data) => {
-          figures = data;
+      function updateCount(filteredItems) {
+        const total = filteredItems.length;
+        const have = filteredItems.filter((i) => owned[i.FigureID]).length;
+        countEl.textContent = `${have} / ${total} collected`;
+        progressBar.style.width = total ? (have / total) * 100 + "%" : "0%";
+      }
 
-          figures.forEach((figure) => {
-            const card = document.createElement("div");
-            card.className = "card";
+      function filterAndRender() {
+        let filtered = items.filter((i) => {
+          const nameMatch = i.FigureName.toLowerCase().includes(
+            searchInput.value.toLowerCase(),
+          );
+          const categoryMatch = categoryFilter.value
+            ? i.Category === categoryFilter.value
+            : true;
+          return nameMatch && categoryMatch;
+        });
+        const sortValue = sortSelect.value;
+        filtered.sort((a, b) => {
+          if (sortValue.startsWith("name"))
+            return sortValue.endsWith("asc")
+              ? a.FigureName.localeCompare(b.FigureName)
+              : b.FigureName.localeCompare(a.FigureName);
+          if (sortValue.startsWith("year"))
+            return sortValue.endsWith("asc")
+              ? a.Year - b.Year
+              : b.Year - a.Year;
+          return 0;
+        });
+        render(filtered);
+      }
 
-            card.innerHTML = `
+      function render(filteredItems) {
+        grid.innerHTML = "";
+        filteredItems.forEach((item) => {
+          const card = document.createElement("div");
+          card.className = "card";
+          const rarityClasses = getRarityClass(item.Rarity);
+          if (rarityClasses.border) card.classList.add(rarityClasses.border);
+
+          const isBrick = currentType === "bricks";
+          const bricklink = item.FigureID
+            ? isBrick
+              ? `https://www.bricklink.com/v2/catalog/catalogitem.page?P=${item.FigureID}`
+              : `https://www.bricklink.com/v2/catalog/catalogitem.page?M=${item.FigureID}`
+            : null;
+          const bricksetLink = isBrick
+            ? item.BricksetID
+              ? `https://brickset.com/parts/${item.BricksetID}`
+              : null
+            : `https://brickset.com/minifigs/${item.FigureID}`;
+
+          card.innerHTML = `
             <div class="front">
-              <img src="images/${figure.FigureID.toLowerCase()}.png" class="minifig-img">
-              <div class="figure-name">${figure.FigureName}</div>
+              <img src="images/${currentType}/${item.FigureID.toLowerCase()}.png" onerror="this.src='images/placeholder.png'" class="minifig-img">
+              <div class="figure-name" title="${item.FigureName}">${item.FigureName}</div>
             </div>
-
             <div class="back">
-              <div class="figure-name">${figure.FigureName}</div>
-              <div>${figure.Series}</div>
-              <div>${figure.Category}</div>
-              <div>${figure.Year}</div>
-              <div>${figure.Sets} Sets</div>
-              <div>${figure.Rarity}</div>
-
+              <div class="figure-name">${item.FigureName}</div>
+              <div>${item.Series}</div>
+              <div>${item.Category}</div>
+              <div>${item.Year}</div>
+              <div>${item.Sets} Sets</div>
+              <div>${item.Rarity}</div>
               <div class="links">
-                <a href="https://www.bricklink.com/v2/catalog/catalogitem.page?M=${figure.FigureID}"
-                   target="_blank"
-                   onclick="event.stopPropagation();">BrickLink</a>
-                <a href="https://brickset.com/minifigs/${figure.FigureID}"
-                   target="_blank"
-                   onclick="event.stopPropagation();">BrickSet</a>
+                ${bricklink ? `<a href="${bricklink}" target="_blank">BrickLink</a>` : `<span class="disabled">BrickLink</span>`}
+                ${bricksetLink ? `<a href="${bricksetLink}" target="_blank">BrickSet</a>` : `<span class="disabled">BrickSet</span>`}
               </div>
             </div>
+            ${item.Rarity ? `<div class="rarity-badge ${rarityClasses.badge}">${item.Rarity}</div>` : ""}
           `;
-
-            if (owned[figure.FigureID]) {
-              card.classList.add("owned");
-            }
-
-            card.onclick = () => {
-              owned[figure.FigureID] = !owned[figure.FigureID];
-              card.classList.toggle("owned");
-              save();
-              updateCount();
-            };
-
-            grid.appendChild(card);
-          });
-
-          updateCount();
+          if (owned[item.FigureID]) card.classList.add("owned");
+          card.onclick = () => {
+            owned[item.FigureID] = !owned[item.FigureID];
+            card.classList.toggle("owned");
+            save();
+            filterAndRender();
+          };
+          // image size
+          const size = sizeSelect.value;
+          card.querySelector(".minifig-img").style.width =
+            size === "small" ? "70px" : size === "medium" ? "100px" : "130px";
+          grid.appendChild(card);
         });
+        updateCount(filteredItems);
+      }
+
+      function setActiveButton(btn) {
+        document
+          .querySelectorAll(".toggle button")
+          .forEach((b) => b.classList.remove("active-btn"));
+        btn.classList.add("active-btn");
+      }
+
+      function loadData(type, btn) {
+        currentType = type;
+        searchInput.value = "";
+        categoryFilter.innerHTML = '<option value="">All Categories</option>';
+        fetch(`data/${type}.json`)
+          .then((r) => r.json())
+          .then((data) => {
+            items = data;
+            const categories = [
+              ...new Set(data.map((i) => i.Category).filter(Boolean)),
+            ].sort();
+            categories.forEach(
+              (c) =>
+                (categoryFilter.innerHTML += `<option value="${c}">${c}</option>`),
+            );
+            filterAndRender();
+            setActiveButton(btn);
+          });
+      }
+
+      /* ---------- EXTRA FEATURES ---------- */
+      function markAllOwned() {
+        items.forEach((i) => (owned[i.FigureID] = true));
+        save();
+        filterAndRender();
+      }
+      function resetAll() {
+        items.forEach((i) => (owned[i.FigureID] = false));
+        save();
+        filterAndRender();
+      }
+      function toggleDarkMode() {
+        document.body.classList.toggle("dark");
+      }
+      function exportCollection() {
+        const dataStr =
+          "data:text/json;charset=utf-8," +
+          encodeURIComponent(JSON.stringify(owned));
+        const dl = document.createElement("a");
+        dl.setAttribute("href", dataStr);
+        dl.setAttribute("download", "collection.json");
+        dl.click();
+      }
+      function importCollection(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          owned = JSON.parse(e.target.result);
+          save();
+          filterAndRender();
+        };
+        reader.readAsText(file);
+      }
+
+      /* ---------- KEYBOARD NAVIGATION ---------- */
+      document.addEventListener("keydown", (e) => {
+        const cards = [...grid.querySelectorAll(".card")];
+        if (cards.length === 0) return;
+        let idx = cards.findIndex((c) => c === document.activeElement);
+        if (idx === -1) idx = 0;
+        if (e.key === "ArrowRight") {
+          idx = (idx + 1) % cards.length;
+          cards[idx].focus();
+        }
+        if (e.key === "ArrowLeft") {
+          idx = (idx - 1 + cards.length) % cards.length;
+          cards[idx].focus();
+        }
+        if (e.key === "ArrowDown") {
+          idx = (idx + 5) % cards.length;
+          cards[idx].focus();
+        }
+        if (e.key === "ArrowUp") {
+          idx = (idx - 5 + cards.length) % cards.length;
+          cards[idx].focus();
+        }
+        if (e.key === "Enter" || e.key === " ") {
+          cards[idx].click();
+        }
+      });
+
+      /* ---------- DEFAULT ---------- */
+      loadData("figures", document.getElementById("btnFigures"));
     </script>
   </body>
 </html>
