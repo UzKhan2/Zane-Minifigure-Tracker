@@ -92,7 +92,8 @@
         box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
         transition:
           0.2s,
-          border-color 0.3s,
+          box-shadow 0.25s,
+          border-color 0.25s,
           opacity 0.3s;
         user-select: none;
         position: relative;
@@ -103,12 +104,18 @@
         background: #2c2c2c;
         box-shadow: 0 3px 8px rgba(0, 0, 0, 0.6);
       }
+      body.dark .card.owned {
+        background: #2e5f2e;
+        box-shadow: 0 0 12px #6cff6ccc;
+      }
+
       .card:hover {
         transform: scale(1.05);
       }
 
       .owned {
         background: #c8f7c5;
+        box-shadow: 0 0 10px #4caf50aa;
         text-decoration: line-through;
       }
 
@@ -248,10 +255,10 @@
         oninput="filterAndRender()"
       />
       <select id="sort" onchange="filterAndRender()">
-        <option value="name-asc">Name ↑</option>
-        <option value="name-desc">Name ↓</option>
         <option value="year-asc">Year ↑</option>
         <option value="year-desc">Year ↓</option>
+        <option value="name-asc">Name ↑</option>
+        <option value="name-desc">Name ↓</option>
       </select>
       <select id="categoryFilter" onchange="filterAndRender()">
         <option value="">All Categories</option>
